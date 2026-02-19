@@ -16,6 +16,8 @@ export function createTimelineUI({
   onAddKeyframe,
   onDeleteKeyframe,
   onSelectKeyframe,
+  onKeyframeValueDrag,
+  onKeyframeTangentDrag,
 }) {
   container.innerHTML = `
     <div class="timeline-inner">
@@ -51,7 +53,11 @@ export function createTimelineUI({
   const domain = container.querySelector('[data-role="domain"]');
   const addButton = container.querySelector('[data-role="add-keyframe"]');
   const deleteButton = container.querySelector('[data-role="delete-keyframe"]');
-  const curveGraph = createCurveGraph({ trackElement: track });
+  const curveGraph = createCurveGraph({
+    trackElement: track,
+    onKeyframeValueDrag,
+    onKeyframeTangentDrag,
+  });
 
   let duration = 3;
   let keyframes = [];

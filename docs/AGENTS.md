@@ -22,12 +22,15 @@ The live app runs at `http://localhost:5173` after `npm install && npm run dev`.
 
 ---
 
-## Project State (as of initial commit)
+## Project State
 
 ### What works
 - All three animation modes: Vertex Animation, Bone Animation, Skinning
-- Custom keyframe engine with Step / Linear / Smooth interpolation
+- Custom keyframe engine with Step / Linear / Smooth (cubic Hermite) interpolation
+- Per-keyframe `easeOut`/`easeIn` tangent slopes for Smooth mode
 - Interactive timeline: scrub, add/delete keyframes, select keyframe to edit value
+- Canvas-based curve graph: real-time value-vs-time plot with keyframe dots, Bézier tangent handles, axis hints, and playhead-value indicator
+- Interactive graph editing: drag keyframe dots to change values, drag tangent handles to sculpt ease curves
 - Weight heatmap visualization with live smoothness slider
 - Color-coded joint markers (visible only when weight colors are shown)
 - Bone color legend in sidebar matching joint markers
@@ -35,16 +38,11 @@ The live app runs at `http://localhost:5173` after `npm install && npm run dev`.
 - Keyboard shortcuts: Space, ←/→, K, Delete
 - Pre-populated 3-second looping animation on load
 
-### What is NOT implemented (stretch features)
-- Value-vs-time graph view
+### What is NOT implemented (stretch ideas)
 - Ghost poses / onion skin
 - Multi-channel (only `boneRotation` and `bendAmount` channels exist)
 - Per-vertex weight inspector
 - GLTF import
-
-### Remote Git
-- Local repo initialized, initial commit made
-- **No remote configured yet** — user needs to provide a GitHub/GitLab URL
 
 ---
 
@@ -55,7 +53,7 @@ The live app runs at `http://localhost:5173` after `npm install && npm run dev`.
 | `src/main.js` | App entry, state object, UI wiring, rAF loop |
 | `src/style.css` | All CSS — dark theme, CSS Grid, components |
 | `src/animation/channel.js` | `Channel` class — the teaching core |
-| `src/animation/interpolation.js` | Step / Linear / Smooth math |
+| `src/animation/interpolation.js` | Step / Linear / Smooth (cubic Hermite) math |
 | `src/animation/playback.js` | `PlaybackController` |
 | `src/scene/setup.js` | Three.js scene, camera, lights, resize |
 | `src/scene/rig.js` | Procedural rig, skin weights, joint markers |
@@ -64,6 +62,7 @@ The live app runs at `http://localhost:5173` after `npm install && npm run dev`.
 | `src/modes/skinningMode.js` | Skinning mode driver + educator text |
 | `src/ui/sidebar.js` | Sidebar DOM component |
 | `src/ui/timeline.js` | Timeline DOM component |
+| `src/ui/curveGraph.js` | Canvas curve graph + interactive keyframe/tangent drag |
 | `src/ui/overlays.js` | Educator panel + stats overlay |
 | `docs/ARCHITECTURE.md` | Full architecture reference |
 | `docs/skeletal-animation-explainer_PRD.md` | Original product requirements |
@@ -146,10 +145,11 @@ Components are **pure renderers** — they write HTML into `container` once on c
 - Capture new rest positions immediately after geometry creation.
 - Recompute skin weights by calling `setWeightSmoothness` after geometry changes.
 
-### Add a stretch feature (graph view, ghost poses, etc.)
-- See `docs/ARCHITECTURE.md` → Stretch Features section.
+### Add a stretch feature (ghost poses, vertex inspector, etc.)
+- See `docs/ARCHITECTURE.md` → Remaining Stretch Ideas section.
 - Keep new files under `src/ui/` for UI additions or `src/scene/` for 3D additions.
 - Do not modify `Channel.evaluate()` or `interpolateValues()` without updating the educator panel text to match.
+- When adding interactive elements to the timeline, respect the z-index / `pointer-events` stacking — see the Known Constraints section in `ARCHITECTURE.md` for details.
 
 ---
 

@@ -34,8 +34,10 @@ npm run preview    # preview production build locally
   - **Vertex Animation** — direct `BufferGeometry.position` edits per frame
   - **Bone Animation** — skeleton-only view, bone transforms driven by keyframes
   - **Skinning** — `SkinnedMesh` deformed by bone transforms + skin weights
-- **Custom mini keyframe engine** — hand-written `Channel.evaluate(t)` with Step / Linear / Smooth (smoothstep) interpolation. No `THREE.AnimationMixer`.
+- **Custom mini keyframe engine** — hand-written `Channel.evaluate(t)` with Step / Linear / Smooth (cubic Hermite) interpolation. No `THREE.AnimationMixer`.
 - **Interactive timeline** — draggable playhead, clickable diamond keyframe markers, add/delete keys
+- **Curve graph** — real-time value-vs-time plot rendered on a double-buffered canvas inside the timeline track, with axis hints, sampled curve path, keyframe dots, and a moving playhead-value indicator
+- **Interactive graph editing** — drag keyframe dots vertically to change values; drag Bézier tangent handles to sculpt ease-in/ease-out curves directly on the graph
 - **Keyframe editor** — select a keyframe to edit its value and interpolation mode
 - **Weight visualization** — heatmap overlay showing per-vertex bone influence
 - **Weight smoothness slider** — live recompute of skin weights from sharp (one bone per vertex) to smooth (blended), demonstrating skinning artifacts
@@ -80,6 +82,7 @@ src/
   ui/
     sidebar.js          # Mode selector, visibility, keyframe editor, weight tools
     timeline.js         # Transport controls, scrub track, keyframe markers
+    curveGraph.js       # Canvas-based interpolation curve graph + interactive drag
     overlays.js         # Educator panel + stats overlay
   main.js               # App entry — state, wiring, animation loop
   style.css             # Dark-mode theme, CSS Grid layout, all component styles
@@ -89,8 +92,10 @@ index.html
 package.json
 ```
 
-## Further Reading
+## Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code design decisions and data flow
-- [`docs/AGENTS.md`](docs/AGENTS.md) — context for AI coding agents picking up this project
-- [`docs/skeletal-animation-explainer_PRD.md`](docs/skeletal-animation-explainer_PRD.md) — original PRD
+| Document | Purpose |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Code design decisions, module map, and data flow |
+| [`docs/AGENTS.md`](docs/AGENTS.md) | Context and rules for AI coding agents picking up this project |
+| [`docs/skeletal-animation-explainer_PRD.md`](docs/skeletal-animation-explainer_PRD.md) | Original product requirements document |

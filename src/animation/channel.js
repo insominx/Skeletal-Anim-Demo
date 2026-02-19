@@ -7,7 +7,12 @@ export class Channel {
     this.id = id;
     this.label = label;
     this.keyframes = [...keyframes]
-      .map((keyframe) => ({ t: Number(keyframe.t), v: Number(keyframe.v) }))
+      .map((keyframe) => ({
+        t: Number(keyframe.t),
+        v: Number(keyframe.v),
+        easeOut: Number(keyframe.easeOut ?? 0),
+        easeIn: Number(keyframe.easeIn ?? 0),
+      }))
       .sort((a, b) => a.t - b.t);
     this.interpolation = interpolation;
     this.ui = {
@@ -41,7 +46,7 @@ export class Channel {
       return existingIndex;
     }
 
-    this.keyframes.push({ t: time, v: value });
+    this.keyframes.push({ t: time, v: value, easeOut: 0, easeIn: 0 });
     this.keyframes.sort((a, b) => a.t - b.t);
     return this.keyframes.findIndex((keyframe) => Math.abs(keyframe.t - time) < KEYFRAME_EPSILON);
   }
@@ -60,6 +65,20 @@ export class Channel {
     }
 
     this.keyframes[index].v = Number(value);
+  }
+
+  setKeyframeTangents(index, easeOut, easeIn) {
+    if (index == null || index < 0 || index >= this.keyframes.length) {
+      return;
+    }
+
+    if (easeOut != null) {
+      this.keyframes[index].easeOut = Number(easeOut);
+    }
+
+    if (easeIn != null) {
+      this.keyframes[index].easeIn = Number(easeIn);
+    }
   }
 
   findClosestKeyframeIndex(time) {
@@ -109,7 +128,7 @@ export class Channel {
       if (t >= left.t && t <= right.t) {
         const range = right.t - left.t;
         const u = range <= KEYFRAME_EPSILON ? 0 : (t - left.t) / range;
-        return interpolateValues(left.v, right.v, u, this.interpolation);
+        return interpolateValues(left.v, right.v, u, this.interpolation, left.easeOut, right.easeIn);
       }
     }
 

@@ -38,6 +38,7 @@ src/
 └── ui/
     ├── sidebar.js           Sidebar DOM: mode selector, toggles, KF editor
     ├── timeline.js          Timeline DOM: transport, scrub, markers
+    ├── curveGraph.js        Canvas curve graph + interactive keyframe/tangent drag
     └── overlays.js          Educator panel + stats overlay
 ```
 
@@ -91,25 +92,25 @@ The animation loop (`animate()`) calls `timelineUI.setPlaybackState()` and `over
 
 ### `Channel` (`src/animation/channel.js`)
 
-The core teaching artifact. Stores sorted `{ t, v }` keyframes and evaluates them:
+The core teaching artifact. Stores sorted `{ t, v, easeOut, easeIn }` keyframes and evaluates them:
 
 ```js
 evaluate(time) {
   // 1. Clamp to first/last keyframe
   // 2. Find bounding pair (left, right)
   // 3. Compute u = (t - left.t) / (right.t - left.t)
-  // 4. Delegate to interpolateValues(left.v, right.v, u, mode)
+  // 4. Delegate to interpolateValues(left.v, right.v, u, mode, left.easeOut, right.easeIn)
 }
 ```
 
-Supports add / remove / edit keyframes. Keeps array sorted by time.
+Supports add / remove / edit keyframes and per-keyframe tangents (`setKeyframeTangents`). Keeps array sorted by time. The `easeOut` and `easeIn` fields are slope values used as cubic Hermite tangent weights in Smooth mode.
 
 ### `interpolateValues` (`src/animation/interpolation.js`)
 
 Three modes:
 - **Step** — returns `v0` (no blending)
 - **Linear** — `v0 + u * (v1 - v0)`
-- **Smooth** — `smoothStep(u) = u*u*(3-2*u)`, then linear blend
+- **Smooth** — cubic Hermite spline via `cubicHermite(v0, m0, v1, m1, u)` where `m0`/`m1` are the `easeOut`/`easeIn` tangent slopes from the bounding keyframes
 
 ### `PlaybackController` (`src/animation/playback.js`)
 
@@ -152,6 +153,17 @@ Each mode file exports:
 - A frozen metadata object (`concept`, `description`, `guidedStep`) consumed by the educator panel
 - A `run*Mode(rig, params)` function called each frame
 
+### Curve Graph (`src/ui/curveGraph.js`)
+
+A double-buffered canvas renderer embedded inside the timeline track. A static layer (axis hints, sampled curve path, keyframe dots, Bézier tangent handles) is cached and only redrawn when the data signature changes. A dynamic layer composites the static image and draws a moving playhead-value dot each frame.
+
+Interactive features:
+- **Keyframe drag** — pointer-down on a keyframe dot captures the pointer; vertical movement maps to value changes via `layout.yToValue(y)` and fires `onKeyframeValueDrag`.
+- **Tangent drag** — pointer-down on a Bézier handle square captures the pointer; vertical movement computes a new slope and fires `onKeyframeTangentDrag`.
+- **Hover feedback** — cursor changes to `ns-resize` over handles and `pointer` over keyframe dots.
+
+The canvas uses `pointer-events: auto` and sits at `z-index: 0`. The keyframe marker layer above it uses `pointer-events: none` (with `pointer-events: auto` on individual markers) so that canvas hit-testing works correctly.
+
 ### UI Components
 
 All UI components follow the same pattern:
@@ -165,7 +177,7 @@ All UI components follow the same pattern:
 ```
 .app-grid {
   grid-template-columns: minmax(0, 1fr) 350px;
-  grid-template-rows: minmax(0, 1fr) 180px;
+  grid-template-rows: minmax(0, 1fr) 230px;
   grid-template-areas:
     "viewport sidebar"
     "timeline sidebar";
@@ -186,9 +198,13 @@ The Three.js canvas is appended directly into `.viewport-panel` by the renderer.
 
 ---
 
-## Stretch Features (Not Implemented)
+## Implemented Stretch Features
 
-- Value-vs-time graph view
+- **Value-vs-time curve graph** — real-time canvas graph in the timeline with interactive keyframe and tangent editing
+- **Per-keyframe tangents** — `easeOut`/`easeIn` slopes stored on each keyframe, editable via Bézier handle drag on the graph
+
+## Remaining Stretch Ideas
+
 - Ghost poses / onion skin at keyframe times
 - Multi-channel (additional bone rotation channels)
 - Per-vertex weight inspector (click vertex to see breakdown)

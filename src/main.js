@@ -196,6 +196,30 @@ const timelineUI = createTimelineUI({
 
     refreshStaticUI();
   },
+  onKeyframeValueDrag: (index, newValue) => {
+    const selectedChannel = getSelectedChannel();
+    selectedChannel.setKeyframeValue(index, newValue);
+    if (state.selectedKeyframeIndex !== index) {
+      state.selectedKeyframeIndex = index;
+      const selected = selectedChannel.getKeyframe(index);
+      if (selected) {
+        playback.setTime(selected.t);
+      }
+    }
+    refreshStaticUI();
+  },
+  onKeyframeTangentDrag: (index, easeOut, easeIn) => {
+    const selectedChannel = getSelectedChannel();
+    selectedChannel.setKeyframeTangents(index, easeOut, easeIn);
+    if (state.selectedKeyframeIndex !== index) {
+      state.selectedKeyframeIndex = index;
+      const selected = selectedChannel.getKeyframe(index);
+      if (selected) {
+        playback.setTime(selected.t);
+      }
+    }
+    refreshStaticUI();
+  },
 });
 
 function refreshStaticUI() {
