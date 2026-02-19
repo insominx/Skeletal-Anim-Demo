@@ -84,7 +84,7 @@ export function createTimelineUI({
   };
 
   const updatePlaybackUI = () => {
-    playhead.style.left = `${timeToPercent(currentTime)}%`;
+    playhead.style.left = `calc(24px + ${timeToPercent(currentTime)}% * (100% - 32px) / 100%)`;
     timeValue.textContent = formatTime(currentTime);
     playToggle.textContent = isPlaying ? "❚❚" : "▶";
     playToggle.setAttribute("aria-label", isPlaying ? "Pause" : "Play");
@@ -97,7 +97,7 @@ export function createTimelineUI({
       const marker = document.createElement("button");
       marker.type = "button";
       marker.className = `timeline-marker${index === selectedIndex ? " selected" : ""}`;
-      marker.style.left = `${timeToPercent(keyframe.t)}%`;
+      marker.style.left = `calc(24px + ${timeToPercent(keyframe.t)}% * (100% - 32px) / 100%)`;
       marker.title = `Keyframe @ ${keyframe.t.toFixed(2)}s`;
       marker.ariaLabel = `Select keyframe ${index + 1}`;
       marker.addEventListener("click", (event) => {
@@ -113,7 +113,10 @@ export function createTimelineUI({
 
   const scrubFromPointer = (event) => {
     const rect = track.getBoundingClientRect();
-    const ratio = clamp01((event.clientX - rect.left) / Math.max(1, rect.width));
+    const paddingLeft = 24;
+    const paddingRight = 8;
+    const usableWidth = Math.max(1, rect.width - paddingLeft - paddingRight);
+    const ratio = clamp01((event.clientX - rect.left - paddingLeft) / usableWidth);
     currentTime = ratio * duration;
     updatePlaybackUI();
     onScrub?.(currentTime);
