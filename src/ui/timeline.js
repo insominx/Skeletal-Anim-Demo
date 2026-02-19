@@ -19,11 +19,17 @@ export function createTimelineUI({
 }) {
   container.innerHTML = `
     <div class="timeline-inner">
-      <div class="timeline-transport">
-        <button class="transport-button" data-role="play-toggle" type="button" aria-label="Pause">❚❚</button>
-        <div class="time-badge">
-          <span class="badge-label">Current Time</span>
-          <span class="badge-value" data-role="time-value">00.00s</span>
+      <div class="timeline-top-bar">
+        <div class="timeline-transport">
+          <button class="transport-button" data-role="play-toggle" type="button" aria-label="Pause">❚❚</button>
+          <div class="time-badge">
+            <span class="badge-label">Current Time</span>
+            <span class="badge-value" data-role="time-value">00.00s</span>
+          </div>
+        </div>
+        <div class="timeline-actions">
+          <button type="button" data-role="add-keyframe">Add Key</button>
+          <button type="button" data-role="delete-keyframe" class="danger">Delete</button>
         </div>
       </div>
 
@@ -31,13 +37,8 @@ export function createTimelineUI({
         <div class="timeline-track" data-role="track" role="slider" aria-label="Animation timeline">
           <div class="timeline-keyframe-layer" data-role="markers"></div>
           <div class="timeline-playhead" data-role="playhead"></div>
+          <div class="timeline-domain" data-role="domain"></div>
         </div>
-        <div class="timeline-domain" data-role="domain"></div>
-      </div>
-
-      <div class="timeline-actions">
-        <button type="button" data-role="add-keyframe">Add Key</button>
-        <button type="button" data-role="delete-keyframe" class="danger">Delete</button>
       </div>
     </div>
   `;

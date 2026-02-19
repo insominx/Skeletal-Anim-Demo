@@ -43,7 +43,7 @@ body {
   height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 350px;
-  grid-template-rows: minmax(0, 1fr) 180px;
+  grid-template-rows: minmax(0, 1fr) 230px;
   grid-template-areas:
     "viewport sidebar"
     "timeline sidebar";
@@ -323,18 +323,25 @@ input[type="range"] {
 }
 
 .timeline-inner {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   height: 100%;
   padding: 12px 16px;
+}
+
+.timeline-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .timeline-transport {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
 }
 
 .transport-button {
@@ -374,11 +381,16 @@ input[type="range"] {
 
 .timeline-track-zone {
   min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .timeline-track {
   position: relative;
-  height: 62px;
+  flex: 1;
+  min-height: 0;
   border-radius: 12px;
   background:
     linear-gradient(180deg, rgba(40, 57, 85, 0.5), rgba(27, 38, 58, 0.72)),
@@ -411,12 +423,12 @@ input[type="range"] {
 
 .timeline-marker {
   position: absolute;
-  top: 22px;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%) rotate(45deg);
   width: 14px;
   height: 14px;
   border: 1px solid rgba(250, 241, 255, 0.7);
   background: rgba(115, 179, 255, 0.9);
-  transform: translateX(-50%) rotate(45deg);
   border-radius: 2px;
   cursor: pointer;
 }
@@ -424,6 +436,7 @@ input[type="range"] {
 .timeline-marker.selected {
   background: rgba(255, 209, 98, 0.95);
   box-shadow: 0 0 0 4px rgba(255, 197, 95, 0.2);
+  transform: translateX(-50%) translateY(-50%) rotate(45deg);
 }
 
 .timeline-playhead {
@@ -438,17 +451,23 @@ input[type="range"] {
 }
 
 .timeline-domain {
-  margin-top: 6px;
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  padding: 0 3px;
+  color: rgba(155, 176, 207, 0.55);
+  font-size: 0.72rem;
+  padding: 0 6px;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .timeline-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .timeline-actions button {
@@ -488,7 +507,7 @@ select:disabled {
     height: auto;
     min-height: 100vh;
     grid-template-columns: 1fr;
-    grid-template-rows: 56vh auto 220px;
+    grid-template-rows: 56vh auto 260px;
     grid-template-areas:
       "viewport"
       "sidebar"
@@ -500,10 +519,11 @@ select:disabled {
   }
 
   .timeline-inner {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    align-items: stretch;
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .timeline-top-bar {
+    flex-wrap: wrap;
   }
 
   .timeline-actions {
