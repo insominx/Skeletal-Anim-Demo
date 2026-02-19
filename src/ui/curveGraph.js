@@ -1,3 +1,5 @@
+import { INTERPOLATION_MODES } from "../animation/interpolation.js";
+
 const SAMPLE_COUNT = 200;
 const RESIZE_DEBOUNCE_MS = 100;
 
@@ -162,6 +164,80 @@ function drawCurve(context, samples, layout) {
   context.restore();
 }
 
+function drawBezierHandles(context, channel, layout, selectedKeyframeIndex) {
+  if (channel.interpolation !== INTERPOLATION_MODES.SMOOTH) {
+    return;
+  }
+
+  if (selectedKeyframeIndex == null) {
+    return;
+  }
+
+  const keyframes = channel.keyframes;
+  if (keyframes.length < 2) {
+    return;
+  }
+
+  const segmentIndices = [];
+
+  if (selectedKeyframeIndex > 0) {
+    segmentIndices.push(selectedKeyframeIndex - 1);
+  }
+
+  if (selectedKeyframeIndex < keyframes.length - 1) {
+    segmentIndices.push(selectedKeyframeIndex);
+  }
+
+  const drawKnob = (x, y) => {
+    const half = 3.5;
+    context.beginPath();
+    context.rect(x - half, y - half, half * 2, half * 2);
+    context.fillStyle = "rgba(255, 209, 98, 0.85)";
+    context.fill();
+    context.lineWidth = 1;
+    context.strokeStyle = "rgba(255, 209, 98, 0.4)";
+    context.stroke();
+  };
+
+  segmentIndices.forEach((segIndex) => {
+    const left = keyframes[segIndex];
+    const right = keyframes[segIndex + 1];
+    const segDuration = right.t - left.t;
+
+    const cp1 = { t: left.t + segDuration / 3, v: left.v };
+    const cp2 = { t: right.t - segDuration / 3, v: right.v };
+
+    const leftX = layout.timeToX(left.t);
+    const leftY = layout.valueToY(left.v);
+    const rightX = layout.timeToX(right.t);
+    const rightY = layout.valueToY(right.v);
+    const cp1X = layout.timeToX(cp1.t);
+    const cp1Y = layout.valueToY(cp1.v);
+    const cp2X = layout.timeToX(cp2.t);
+    const cp2Y = layout.valueToY(cp2.v);
+
+    context.save();
+    context.setLineDash([3, 3]);
+    context.strokeStyle = "rgba(255, 209, 98, 0.55)";
+    context.lineWidth = 1;
+
+    context.beginPath();
+    context.moveTo(leftX, leftY);
+    context.lineTo(cp1X, cp1Y);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(rightX, rightY);
+    context.lineTo(cp2X, cp2Y);
+    context.stroke();
+
+    context.restore();
+
+    drawKnob(cp1X, cp1Y);
+    drawKnob(cp2X, cp2Y);
+  });
+}
+
 function drawKeyframeDots(context, channel, layout, selectedKeyframeIndex) {
   channel.keyframes.forEach((keyframe, index) => {
     const x = layout.timeToX(keyframe.t);
@@ -241,6 +317,7 @@ export function createCurveGraph({ trackElement }) {
     const samples = sampleCurve(currentChannel, currentDuration, layout);
     drawCurve(staticContext, samples, layout);
     drawKeyframeDots(staticContext, currentChannel, layout, currentSelectedKeyframeIndex);
+    drawBezierHandles(staticContext, currentChannel, layout, currentSelectedKeyframeIndex);
   }
 
   function drawPlayheadValueDot() {
