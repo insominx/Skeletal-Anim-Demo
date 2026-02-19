@@ -221,6 +221,13 @@ function refreshStaticUI() {
     canDelete: state.selectedKeyframeIndex != null,
   });
 
+  timelineUI.setCurveState({
+    channel: selectedChannel,
+    duration: playback.duration,
+    currentTime: playback.currentTime,
+    selectedKeyframeIndex: state.selectedKeyframeIndex,
+  });
+
   overlays.setEducator(modeMeta);
 }
 
@@ -228,6 +235,7 @@ function updatePerFrame() {
   const currentTime = playback.currentTime;
   const boneRotationDegrees = CHANNEL_BY_ID.get("boneRotation").evaluate(currentTime);
   const bendAmount = CHANNEL_BY_ID.get("bendAmount").evaluate(currentTime);
+  const selectedChannel = getSelectedChannel();
 
   if (state.modeId === VERTEX_MODE.id) {
     runVertexMode(rig, { bendAmount });
@@ -237,6 +245,13 @@ function updatePerFrame() {
   } else {
     runSkinningMode(rig, { rotationDegrees: boneRotationDegrees });
   }
+
+  timelineUI.setCurveState({
+    channel: selectedChannel,
+    duration: playback.duration,
+    currentTime,
+    selectedKeyframeIndex: state.selectedKeyframeIndex,
+  });
 }
 
 function isTextInputActive(eventTarget) {

@@ -1,3 +1,5 @@
+import { createCurveGraph } from "./curveGraph.js";
+
 function clamp01(value) {
   return Math.min(1, Math.max(0, value));
 }
@@ -48,6 +50,7 @@ export function createTimelineUI({
   const domain = container.querySelector('[data-role="domain"]');
   const addButton = container.querySelector('[data-role="add-keyframe"]');
   const deleteButton = container.querySelector('[data-role="delete-keyframe"]');
+  const curveGraph = createCurveGraph({ trackElement: track });
 
   let duration = 3;
   let keyframes = [];
@@ -159,6 +162,27 @@ export function createTimelineUI({
       renderDomain();
       renderMarkers();
       updatePlaybackUI();
+    },
+
+    setCurveState({
+      channel,
+      duration: nextDuration,
+      currentTime: nextCurrentTime,
+      selectedKeyframeIndex,
+    }) {
+      if (selectedKeyframeIndex !== undefined) {
+        selectedIndex = selectedKeyframeIndex;
+      }
+
+      if (nextDuration !== undefined) {
+        duration = Math.max(0.1, Number(nextDuration) || duration);
+      }
+
+      if (nextCurrentTime !== undefined) {
+        currentTime = Number(nextCurrentTime) || 0;
+      }
+
+      curveGraph.update(channel, duration, currentTime, selectedIndex);
     },
 
     setPlaybackState({ currentTime: nextCurrentTime, isPlaying: nextIsPlaying }) {
