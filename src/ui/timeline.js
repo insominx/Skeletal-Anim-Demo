@@ -12,6 +12,7 @@ function formatTime(seconds) {
 export function createTimelineUI({
   container,
   onTogglePlay,
+  onScrubStart,
   onScrub,
   onAddKeyframe,
   onDeleteKeyframe,
@@ -129,6 +130,7 @@ export function createTimelineUI({
 
     isDragging = true;
     track.setPointerCapture(event.pointerId);
+    onScrubStart?.();
     scrubFromPointer(event);
   });
 

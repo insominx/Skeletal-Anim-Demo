@@ -163,6 +163,9 @@ const timelineUI = createTimelineUI({
   onTogglePlay: () => {
     playback.toggle();
   },
+  onScrubStart: () => {
+    playback.pause();
+  },
   onScrub: (nextTime) => {
     playback.setTime(nextTime);
   },
