@@ -40,6 +40,10 @@ export function createSidebarUI({
           <input type="checkbox" data-role="show-weights" />
           Show Weights (Heatmap)
         </label>
+        <label class="checkbox-line">
+          <input type="checkbox" data-role="show-ghosts" />
+          Show Ghost Poses
+        </label>
 
         <div class="bone-legend" data-role="bone-legend"></div>
       </section>
@@ -99,6 +103,7 @@ export function createSidebarUI({
   const showMeshInput = container.querySelector('[data-role="show-mesh"]');
   const showBonesInput = container.querySelector('[data-role="show-bones"]');
   const showWeightsInput = container.querySelector('[data-role="show-weights"]');
+  const showGhostsInput = container.querySelector('[data-role="show-ghosts"]');
   const boneLegendContainer = container.querySelector('[data-role="bone-legend"]');
   const channelSelect = container.querySelector('[data-role="channel-select"]');
   const interpolationSelect = container.querySelector('[data-role="interpolation-select"]');
@@ -149,6 +154,7 @@ export function createSidebarUI({
       showMesh: showMeshInput.checked,
       showBones: showBonesInput.checked,
       showWeights: showWeightsInput.checked,
+      showGhosts: showGhostsInput.checked,
     });
   };
 
@@ -174,6 +180,7 @@ export function createSidebarUI({
   showMeshInput.addEventListener("change", emitVisibility);
   showBonesInput.addEventListener("change", emitVisibility);
   showWeightsInput.addEventListener("change", emitVisibility);
+  showGhostsInput.addEventListener("change", emitVisibility);
 
   channelSelect.addEventListener("change", () => {
     onChannelChange?.(channelSelect.value);
@@ -209,6 +216,7 @@ export function createSidebarUI({
       showMeshInput.checked = visibility.showMesh;
       showBonesInput.checked = visibility.showBones;
       showWeightsInput.checked = visibility.showWeights;
+      showGhostsInput.checked = Boolean(visibility.showGhosts);
 
       channelSelect.value = selectedChannelId;
       interpolationSelect.value = selectedChannel.interpolation;

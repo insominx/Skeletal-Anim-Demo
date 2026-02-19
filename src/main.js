@@ -4,6 +4,7 @@ import { PlaybackController } from "./animation/playback.js";
 import { BONE_MODE, runBoneMode } from "./modes/boneMode.js";
 import { SKINNING_MODE, runSkinningMode } from "./modes/skinningMode.js";
 import { VERTEX_MODE, runVertexMode } from "./modes/vertexMode.js";
+import { createGhostManager } from "./scene/ghosts.js";
 import { createEducationalRig } from "./scene/rig.js";
 import { createSceneContext } from "./scene/setup.js";
 import { createOverlayController } from "./ui/overlays.js";
@@ -21,6 +22,7 @@ const statsOverlay = document.getElementById("stats-overlay");
 
 const sceneContext = createSceneContext(viewportElement);
 const rig = createEducationalRig(sceneContext.scene);
+const ghostManager = createGhostManager(sceneContext.scene);
 
 const channels = [
   new Channel({
@@ -70,6 +72,7 @@ const state = {
     showMesh: true,
     showBones: true,
     showWeights: false,
+    showGhosts: false,
   },
   selectedChannelId: "boneRotation",
   selectedKeyframeIndex: 0,
@@ -114,6 +117,16 @@ function applyRigVisibility() {
   });
 
   rig.setWeightVisualization(state.visibility.showWeights);
+  ghostManager.setVisible(state.visibility.showGhosts);
+}
+
+function refreshGhosts() {
+  if (!state.visibility.showGhosts) {
+    return;
+  }
+
+  const channel = CHANNEL_BY_ID.get("boneRotation");
+  ghostManager.updateGhosts(channel, rig);
 }
 
 const sidebarUI = createSidebarUI({
@@ -129,6 +142,7 @@ const sidebarUI = createSidebarUI({
   onVisibilityChange: (visibility) => {
     state.visibility = { ...state.visibility, ...visibility };
     applyRigVisibility();
+    refreshGhosts();
     refreshStaticUI();
   },
   onChannelChange: (channelId) => {
@@ -149,6 +163,7 @@ const sidebarUI = createSidebarUI({
     const ui = selectedChannel.ui ?? { min: -1, max: 1 };
     const clamped = Math.min(ui.max, Math.max(ui.min, Number(nextValue)));
     selectedChannel.setKeyframeValue(state.selectedKeyframeIndex, clamped);
+    refreshGhosts();
     refreshStaticUI();
   },
   onWeightSmoothnessChange: (value) => {
@@ -173,6 +188,7 @@ const timelineUI = createTimelineUI({
     const selectedChannel = getSelectedChannel();
     const value = selectedChannel.evaluate(playback.currentTime);
     state.selectedKeyframeIndex = selectedChannel.addKeyframe(playback.currentTime, value);
+    refreshGhosts();
     refreshStaticUI();
   },
   onDeleteKeyframe: () => {
@@ -188,6 +204,7 @@ const timelineUI = createTimelineUI({
       state.selectedKeyframeIndex = Math.min(state.selectedKeyframeIndex, selectedChannel.keyframes.length - 1);
     }
 
+    refreshGhosts();
     refreshStaticUI();
   },
   onSelectKeyframe: (index) => {
@@ -209,6 +226,7 @@ const timelineUI = createTimelineUI({
         playback.setTime(selected.t);
       }
     }
+    refreshGhosts();
     refreshStaticUI();
   },
   onKeyframeTangentDrag: (index, easeOut, easeIn) => {
@@ -322,6 +340,7 @@ window.addEventListener("keydown", (event) => {
     const selectedChannel = getSelectedChannel();
     const value = selectedChannel.evaluate(playback.currentTime);
     state.selectedKeyframeIndex = selectedChannel.addKeyframe(playback.currentTime, value);
+    refreshGhosts();
     refreshStaticUI();
     return;
   }
@@ -337,12 +356,14 @@ window.addEventListener("keydown", (event) => {
     state.selectedKeyframeIndex = selectedChannel.keyframes.length
       ? Math.min(state.selectedKeyframeIndex, selectedChannel.keyframes.length - 1)
       : null;
+    refreshGhosts();
     refreshStaticUI();
   }
 });
 
 rig.setWeightSmoothness(state.weightSmoothness);
 applyRigVisibility();
+refreshGhosts();
 refreshStaticUI();
 
 let previousTime = performance.now();
