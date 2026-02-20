@@ -163,6 +163,10 @@ const sidebarUI = createSidebarUI({
     const ui = selectedChannel.ui ?? { min: -1, max: 1 };
     const clamped = Math.min(ui.max, Math.max(ui.min, Number(nextValue)));
     selectedChannel.setKeyframeValue(state.selectedKeyframeIndex, clamped);
+    const selected = selectedChannel.getKeyframe(state.selectedKeyframeIndex);
+    if (selected) {
+      playback.setTime(selected.t);
+    }
     refreshGhosts();
     refreshStaticUI();
   },
