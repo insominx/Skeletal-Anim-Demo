@@ -205,7 +205,17 @@ The Three.js canvas is appended directly into `.viewport-panel` by the renderer.
 
 ## Remaining Stretch Ideas
 
-- Ghost poses / onion skin at keyframe times
 - Multi-channel (additional bone rotation channels)
 - Per-vertex weight inspector (click vertex to see breakdown)
 - GLTF model import
+- Ghost poses / onion skin at keyframe times
+
+### Future Implementation: Ghost Poses / Onion Skinning
+
+**Goal:** Provide immediate visual context for how the animation arc looks over time without requiring the student to play or scrub the timeline. By rendering "ghosts" (faint, static representations of the rig) at every keyframe point in time, the student can see the full range of motion simultaneously.
+
+**Proposed Architecture:**
+1. **`src/scene/ghosts.js` (NEW):** Implement a Ghost Manager. We will use simple `THREE.LineSegments` colored faintly to represent the skeleton (similar to `SkeletonHelper`), preventing visual clutter that full meshes would create. Expose an `updateGhosts(channel, rig)` method that iterates through every keyframe, temporarily evaluates transforms at `keyframe.t`, stamps a ghost representation into a `THREE.Group`, and returns the rig to its current state.
+2. **`src/scene/setup.js` or `src/scene/rig.js`:** Integrate the ghost group into the scene to handle visibility toggling (only visible when toggled "on").
+3. **`src/main.js`:** Add a `state.visibility.showGhosts` toggle. When a keyframe is added, deleted, dragged, or modified, recalculate ghosts by calling `updateGhosts(...)`.
+4. **`src/ui/sidebar.js`:** Add a specific toggle button or checkbox under the visibility section to flip `state.visibility.showGhosts`.
